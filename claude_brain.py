@@ -1,9 +1,9 @@
 import json, anthropic, config
 _client = anthropic.Anthropic(api_key=config.ANTHROPIC_KEY)
-_SYS = 'You are an expert ICT/SMC trading analyst for CRYPTO. Analyze the setup deeply using ICT concepts: liquidity sweeps, order blocks, fair value gaps, market structure, and session context. Respond ONLY with valid JSON: {"probability": <0-100>, "reasoning": "<two sentences max>"}. No extra text.'
+_SYS = 'You are an expert ICT/SMC trading analyst for crypto. Analyze using ICT concepts: liquidity sweeps, order blocks, fair value gaps, market structure, session context. Respond ONLY with valid JSON: {"probability": <0-100>, "reasoning": "<two sentences max>"}. No extra text.'
 
-def analyze(direction, fvg, s_high, s_low, last_bars):
-    prompt = (CRYPTO ' ' + direction.upper() + ' ICT setup.\nSession H=' + str(round(s_high,4)) + ' L=' + str(round(s_low,4)) + '\nFVG zone: ' + str(round(fvg.get('bottom',0),4)) + '-' + str(round(fvg.get('top',0),4)) + ' SL=' + str(round(fvg.get('sl',0),4)) + '\nRecent 5-min bars:\n' + last_bars + '\nRate this setup probability and reasoning.')
+def analyze(symbol, direction, fvg, s_high, s_low, last_bars):
+    prompt = (symbol + ' ' + direction.upper() + ' ICT setup.\nSession H=' + str(round(s_high,4)) + ' L=' + str(round(s_low,4)) + '\nFVG zone: ' + str(round(fvg.get('bottom',0),4)) + '-' + str(round(fvg.get('top',0),4)) + ' SL=' + str(round(fvg.get('sl',0),4)) + '\nRecent 5-min bars:\n' + last_bars + '\nRate this setup probability and reasoning.')
     try:
         r = _client.messages.create(model='claude-sonnet-4-6', max_tokens=200, system=_SYS, messages=[{'role':'user','content':prompt}])
         d = json.loads(r.content[0].text.strip())
