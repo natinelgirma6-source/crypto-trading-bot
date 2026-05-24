@@ -6,7 +6,6 @@ ET = pytz.timezone('America/New_York')
 
 def get_session():
     now = datetime.now(ET).time()
-    # Handle Asian session crossing midnight
     if now >= dtime(20,0) or now <= dtime(0,0):
         return 'Asian', dtime(20,0)
     for name, (start, end) in config.SESSIONS.items():
@@ -24,8 +23,7 @@ def check_symbol(symbol, session, session_start, state):
         return
     price = float(bars.iloc[-1]['close'])
     s_high, s_low = signals.session_hl(bars, session_start)
-    if s_high is None:
-        return
+    if s_high is None: return
     tradeable, block_reason = risk.can_trade(state)
     stage = state.get('signal_stage')
     direction = state.get('signal_direction')
@@ -77,6 +75,7 @@ def check():
     if state.get('current_session') != session:
         _reset(state); state['current_session'] = session
         risk.save(state)
+        alerts.send_status('CRYPTO BOT - ' + session + ' Session Open\nScanning BTC/USD + ETH/USD\nTime: ' + now_str + '\nDaily PnL: $' + str(state.get('daily_pnl', 0.0)) + '  Trades: ' + str(state.get('trades_today', 0)))
     for symbol in config.SYMBOLS:
         check_symbol(symbol, session, session_start, state)
         state = risk.load()
@@ -85,7 +84,6 @@ def check():
         alerts.send_daily_summary(state)
 
 if __name__ == '__main__':
-    now_str = datetime.now(ET).strftime('%Y-%m-%d %H:%M ET')
-    print('CRYPTO Bot | GitHub Actions | ICT BTC+ETH | ' + now_str)
+    print('CRYPTO Bot | GitHub Actions | ICT BTC+ETH | ' + datetime.now(ET).strftime('%Y-%m-%d %H:%M ET'))
     check()
     print('Done.')
