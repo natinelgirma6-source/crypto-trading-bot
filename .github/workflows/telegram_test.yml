@@ -1,0 +1,17 @@
+name: Telegram Test
+on: workflow_dispatch
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Telegram
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          echo "Token length: ${#TELEGRAM_TOKEN}"
+          echo "Chat ID: $TELEGRAM_CHAT_ID"
+          RESPONSE=$(curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\": \"${TELEGRAM_CHAT_ID}\", \"text\": \"\xf0\x9f\xa7\xaa TEST: Crypto bot Telegram check OK \"}")
+          echo "Response: $RESPONSE"
