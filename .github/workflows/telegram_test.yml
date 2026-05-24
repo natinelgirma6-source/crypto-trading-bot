@@ -4,24 +4,20 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Test Telegram and save result
+      - uses: actions/checkout@v4
+      - name: Test Telegram
         env:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          echo "Token length: ${#TELEGRAM_TOKEN}"
-          echo "Chat ID value: [$TELEGRAM_CHAT_ID]"
-          RESPONSE=$(curl -s "https://api.telegram.org/bot${TELEGRAM_TOKEN}/getMe")
-          echo "getMe: $RESPONSE"
+          GET_ME=$(curl -s "https://api.telegram.org/bot${TELEGRAM_TOKEN}/getMe")
           SEND=$(curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage" \
             -H "Content-Type: application/json" \
-            -d "{\"chat_id\": \"${TELEGRAM_CHAT_ID}\", \"text\": \"TEST from crypto bot - if you see this the bot works\"}")
-          echo "sendMessage: $SEND"
-          mkdir -p results
-          echo "getMe=$RESPONSE" > results/output.txt
-          echo "sendMessage=$SEND" >> results/output.txt
-      - name: Upload result
-        uses: actions/upload-artifact@v4
-        with:
-          name: telegram-test-result
-          path: results/
+            -d "{\"chat_id\": \"${TELEGRAM_CHAT_ID}\", \"text\": \"TEST: Crypto bot connectivity check\"}")
+          git config user.email "bot@test.com"
+          git config user.name "Bot"
+          echo "getMe=$GET_ME" > telegram_test_result.txt
+          echo "sendMessage=$SEND" >> telegram_test_result.txt
+          git add telegram_test_result.txt
+          git commit -m "test: telegram result"
+          git push
